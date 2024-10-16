@@ -1,0 +1,90 @@
+				SERVIDOR CENTRALIZADO
+////////////////////////////////////////////////
+Comandos del Sistema
+/////////////////////////////////////////////
+hostnamectl set-hostname <name>
+systemctl reboot -0
+systemctl shutdown -0
+yum install nano vim -y
+yum install wget unzip -y
+/////////////////////////////////////////////
+Instalar Apache
+////////////////////////////////////////////
+yum install httpd
+service httpd start
+service httpd status
+systemctl enable httpd
+firewall-cmd --permanent --zone=public --add-service=http
+firewall-cmd --permanent --zone=public --add-service=https
+firewall-cmd --reload
+=========Crear index de prueba=============
+cd /var/www/html/
+nano index.html
+
+//////////////////////////////////////////////
+Instalar MySQL
+/////////////////////////////////////////////
+yum install mysql mysql-server -y
+systemctl start mysqld
+systemctl status mysqld
+systemctl enable mysqld
+mysql_secure_installation
+mysql -u root -p
+>create database <database>;
+
+/////////////////////////////////////////////
+Instalar PHP
+////////////////////////////////////////////
+yum install php -y
+dnf install php-fpm -y
+dnf install php-cli php-fpm php-curl php-mysqlnd php-gd php-opcache php-zip php-intl php-common php-bcmath php-imagick php-xml
+php -m
+dnf install php-devel -y
+
+///////////////////////////////////////////
+Instalar WordPress
+//////////////////////////////////////////
+wget <ruta WordPress>
+unzip <latest.zip>
+
+
+				SERVIDORES DISTRIBUIDOS
+SERVIDOR WORDPRESS
+==========Instalar Apache, PHP y WordPress==============
+setenforce 0
+firewall-cmd --zone=public --add-port=3306/tcp --permanent
+firewall-cmd --reload 
+
+SERVIDOR MYSQL (DATA BASE)
+================== Instalar MySQL ====================
+>rename user 'root'@'localhost' TO 'root'@'%';
+setenforce 0
+firewall-cmd --zone=public --add-port=3306/tcp --permanent
+firewall-cmd --reload
+
+				SERVIDOR PROXI
+yum install epel-release -y
+yum install squid -y
+systemctl start squid
+systemctl enable squid
+cd /etc/squid/
+nano <archivo a restringir (paginas-bloqueadas)>
+cp /etc/squid/squid.conf(,.bak)
+nano squid.conf
+///////////////////////////
+Archivo squid.conf
+///////////////////////////
+#Comentar líneas predefinidas al inicio
+#Agregar líneas y lineas no comentadas:
+acl paginas dstdomain "/etc/squid/<name archivo>"
+acl palabras url_regex "/etc/squid/<name archivo>"
+http_access allow localhost manager
+http_access deny manager
+http_access deny palabras
+http_access deny paginas
+http_access allow all
+#Comentar linea http_access deny all
+service squid restart
+systemctl restart squid.service
+firewall-cmd --add-service=squid --permanent
+firewall-cmd --reload
