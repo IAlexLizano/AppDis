@@ -1,0 +1,40 @@
+//////////////////
+modificar ip:
+nmtui
+systemctl restart NetworkManager
+
+/////////////////
+Instalar Nginx y Keepalived
+////////////////
+yum install nginx -y
+yum install keepalived -y
+sestatus
+systemctl start nginx
+systemctl enable nginx
+firewall-cmd --add-service=http --permanent
+firewall-cd --reload
+
+/////////////////
+Ubicación de index
+////////////////
+/usr/share/nginx/html/index.html
+
+////////////////
+Configurar Keepalived
+////////////////
+echo "" | tee /etc/keepalived/keepalived.conf
+nano /etc/keepalived/keepalived.conf
+chmod 755 /bin/check_ngnx.sh
+service keepalived start
+firewall-cmd --add-rich-rule='role protocol value="vrrp" accept' --permanent
+firewall-cmd --reload
+service keepalived restart
+
+//////////////////////
+Sincronización con rsync
+/////////////////////
+yum install rsync -y
+(Opcional) yum install sshpass -y
+ssh-keygen -t rsa -b 4096
+ssh-copy-id [user destino]@[dirección ip destino]
+rsync -avzL [path del archivo de origen] [user_destino]@[ip_destino]:[path del directorio de destino]
